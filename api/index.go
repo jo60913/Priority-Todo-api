@@ -139,6 +139,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				"ErrorMsg":  "",
 				"ErrorFlag": "0",
 			})
+			return
 		}
 
 		log.Println("login ", "密碼錯誤")
