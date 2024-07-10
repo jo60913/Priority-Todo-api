@@ -44,9 +44,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer client.Close()
 	// 新增會員
 	server.POST("/insert/user", func(ctx *Context) {
-		var userInfo model.UserInfo
-		err := json.NewDecoder(ctx.Req.Body).Decode(&userInfo)
-		log.Println("/insert/user ", "UserToken : "+userInfo.UserAccount)
+		var userAdd model.UserAdd
+		err := json.NewDecoder(ctx.Req.Body).Decode(&userAdd)
+		log.Println("/insert/user ", "UserToken : "+userAdd.UserAccount)
 		if err != nil {
 			log.Println("/insert/user 傳入參數錯誤", err.Error())
 			ctx.JSON(http.StatusOK, H{
@@ -56,12 +56,13 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, readErr := client.Collection(userInfo.UserAccount).Doc(attribute).Get(context.Background())
+		_, readErr := client.Collection(userAdd.UserAccount).Doc(attribute).Get(context.Background())
 		if readErr != nil { //沒有notification時新增
 			log.Println("/insert/user 找notification時錯誤", readErr.Error())
-			_, addErr := client.Collection(userInfo.UserAccount).Doc(attribute).Create(context.Background(), map[string]interface{}{
-				"password": userInfo.UserPassword,
+			_, addErr := client.Collection(userAdd.UserAccount).Doc(attribute).Create(context.Background(), map[string]interface{}{
+				"password": userAdd.UserPassword,
 				"FcmValue": true,
+				"userName": userAdd.UserName,
 			})
 			if addErr != nil {
 				log.Println("/insert/user 新增時錯誤", addErr.Error())
@@ -80,7 +81,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		ctx.JSON(http.StatusOK, H{
-			"ErrorMsg":  "該帳號已存在，請取其他名字",
+			"ErrorMsg":  "該帳號已存在，請取其他帳號",
 			"ErrorFlag": "1",
 		})
 	})
